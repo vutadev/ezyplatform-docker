@@ -1,0 +1,54 @@
+services:
+    mysql:
+      image: mysql:8.0
+      container_name: ezyplatform-mysql
+      restart: unless-stopped
+      environment:
+        - MYSQL_ROOT_PASSWORD=root_password
+        - MYSQL_DATABASE=blog
+        - MYSQL_USER=ezyplatform
+        - MYSQL_PASSWORD=ezyplatform_password
+      ports:
+        - "13306:3306"
+      volumes:
+        - mysql-data:/var/lib/mysql
+      command: --default-authentication-plugin=mysql_native_password
+      healthcheck:
+        test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+        timeout: 20s
+        retries: 10
+
+    ezyplatform:
+      build:
+        context: .
+        dockerfile: Dockerfile
+        args:
+          - EZ_VERSION=latest
+      image: youngmonkeys/ezyplatform-only-update:latest
+      container_name: ezyplatform
+      restart: unless-stopped
+      depends_on:
+        mysql:
+          condition: service_healthy
+      environment:
+        - DB_HOST=mysql
+        - DB_PORT=3306
+        - DB_NAME=blog
+        - DB_USERNAME=ezyplatform
+        - DB_PASSWORD=ezyplatform_password
+        - DB_TABLES_CREATE_MANUALLY=false
+      ports:
+        - "9090"
+        - "8080"
+        - "18080"
+        - "3005"
+        - "2208"
+        - "2611/udp"
+      volumes:
+        - settings:/app/ezyplatform/settings
+        - upload:/app/ezyplatform/upload
+
+volumes:
+  mysql-data: {}
+  settings: {}
+  upload: {}
