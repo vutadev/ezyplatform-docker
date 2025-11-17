@@ -22,9 +22,12 @@ services:
       build:
         context: .
         dockerfile: Dockerfile
+        platforms:
+            - linux/amd64
+            - linux/arm64
         args:
           - EZ_VERSION=latest
-      image: youngmonkeys/ezyplatform-only-update:latest
+      image: vutadev/ezyplatform-app:latest
       container_name: ezyplatform
       restart: unless-stopped
       depends_on:
