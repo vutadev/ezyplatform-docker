@@ -45,10 +45,11 @@ services:
         - "2208"
         - "2611/udp"
       volumes:
-        - settings:/app/ezyplatform/settings
-        - upload:/app/ezyplatform/upload
+        #- settings:/app/ezyplatform/settings
+        #- upload:/app/ezyplatform/upload
+        - /opt/ezyplatform:/app/ezyplatform
 
 volumes:
   mysql-data: {}
-  settings: {}
-  upload: {}
+  #settings: {}
+  #upload: {}
