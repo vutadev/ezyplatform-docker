@@ -5,6 +5,7 @@ DB_HOST="${DB_HOST:-localhost}"
 DB_PORT="${DB_PORT:-3306}"
 DB_NAME="${DB_NAME:-blog}"
 DB_TABLES_CREATE_MANUALLY="${DB_TABLES_CREATE_MANUALLY:-false}"
+AUTO_START_WEB="${AUTO_START_WEB:-false}"
 
 # Validate required environment variables
 if [ -z "$DB_USERNAME" ]; then
@@ -47,6 +48,30 @@ fi
 
 rm -rf /app/ezyplatform/admin/.runtime/* /app/ezyplatform/socket/.runtime/*  /app/ezyplatform/web/.runtime/*
 bash cli.sh "start admin"
+
+# Auto-start web service with health check monitoring
+if [ "$AUTO_START_WEB" = "true" ]; then
+    echo "AUTO_START_WEB enabled, starting web service..."
+    bash cli.sh "start web"
+
+    # Create health check script
+    cat > /app/ezyplatform/web-health-check.sh << 'EOF'
+#!/bin/bash
+if ! curl -sf http://localhost:8080 > /dev/null 2>&1; then
+    echo "[$(date)] Web health check failed, restarting web service..." >> /app/ezyplatform/logs/web-health-check.log
+    cd /app/ezyplatform && bash cli.sh "start web"
+fi
+EOF
+    chmod +x /app/ezyplatform/web-health-check.sh
+
+    # Set up cron job (every minute)
+    echo "* * * * * /app/ezyplatform/web-health-check.sh" | crontab -
+
+    # Start cron daemon
+    cron
+    echo "Web health check cron job started (checking every minute)"
+fi
+
 while [ ! -f /app/ezyplatform/logs/admin-server.log ]; do
     sleep 1
 done

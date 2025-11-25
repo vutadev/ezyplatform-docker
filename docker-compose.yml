@@ -42,6 +42,7 @@ services:
         - DB_USERNAME=${MYSQL_USER}
         - DB_PASSWORD=${MYSQL_PASSWORD}
         - DB_TABLES_CREATE_MANUALLY=false
+        - AUTO_START_WEB=${AUTO_START_WEB:-false}
       ports:
         - "9090"
         - "8080"

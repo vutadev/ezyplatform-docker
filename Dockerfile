@@ -11,13 +11,16 @@ ENV DB_HOST=localhost \
     DB_NAME=blog \
     DB_USERNAME="" \
     DB_PASSWORD="" \
-    DB_TABLES_CREATE_MANUALLY=false
+    DB_TABLES_CREATE_MANUALLY=false \
+    AUTO_START_WEB=false
 
 ADD https://ezyplatform.com/api/v1/platforms/${EZ_VERSION}/download ezyplatform.zip
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         openjdk-11-jre-headless \
         unzip \
+        curl \
+        cron \
         ca-certificates && \
     unzip ezyplatform.zip && \
     rm ezyplatform.zip && \
